@@ -1,6 +1,9 @@
 {
+  "name": "hypernova-server-middleware",
+  "version": "0.0.1",
+  "main": "middleware.js",
   "scripts": {
-    "dev": "nodemon index.js"
+    "test": "nodemon __test__/index.js"
   },
   "dependencies": {
     "express": "^4.15.4"
