@@ -1,5 +1,5 @@
 const bodyParser = require('body-parser')
-const renderBatch = require('hypernova/utils/renderBatch')
+const renderBatch = require('hypernova/lib/utils/renderBatch')
 
 function assetsConfigurationType(config) {
   if (typeof config.getComponent !== 'function') {
@@ -31,15 +31,21 @@ module.exports = (customConfig) => {
   return (req, res, next) => {
     const { method, originalUrl } = req
     const { endpoint } = config
-    if (deepEqual(method.toLowerCase(), 'post') && deepEqual(originalUrl, endpoint)) {
+    if (deepEqual(method.toLowerCase(), 'get') && deepEqual(originalUrl, endpoint)) {
 
       /* Will throw the error at the server real call time instead of the start time */
       if (configError) throw configError
 
+      console.log('config.getComponent', config.getComponent.toString())
+
+      const result = config.getComponent('HeartBeat')
+      console.log('result', result())
+      res.send(result())
+
       /* Add body-parser middleware to handle the body in request, this callback will really kill me! */
-      bodyParser(req, res, () => {
-        renderBatch(config, () => false)
-      })
+      // bodyParser(req, res, () => {
+      // renderBatch(config, () => false)
+      // })
 
       /* Pipe to the next middleware to do the next job */
       next()
