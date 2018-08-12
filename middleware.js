@@ -1,14 +1,11 @@
-const bodyParser = require('body-parser')
-const renderBatch = require('hypernova/lib/utils/renderBatch')
+const isEqual = require('lodash.isequal');
+const renderBatch = require('hypernova/lib/utils/renderBatch');
 
 function assetsConfigurationType(config) {
   if (typeof config.getComponent !== 'function') {
     return new TypeError('Hypernova requires a `getComponent` property and it must be a function');
   }
-}
-
-function deepEqual(a, b) {
-  return a === b
+  return null;
 }
 
 const defaultConfig = {
@@ -26,29 +23,15 @@ const defaultConfig = {
 
 module.exports = (customConfig) => {
   const config = Object.assign({}, defaultConfig, customConfig);
-  const configError = assetsConfigurationType(config)
+  const configError = assetsConfigurationType(config);
 
-  return (req, res, next) => {
-    const { method, originalUrl } = req
-    const { endpoint } = config
-    if (deepEqual(method.toLowerCase(), 'get') && deepEqual(originalUrl, endpoint)) {
-
-      /* Will throw the error at the server real call time instead of the start time */
-      if (configError) throw configError
-
-      console.log('config.getComponent', config.getComponent.toString())
-
-      const result = config.getComponent('HeartBeat')
-      console.log('result', result())
-      res.send(result())
-
-      /* Add body-parser middleware to handle the body in request, this callback will really kill me! */
-      // bodyParser(req, res, () => {
-      // renderBatch(config, () => false)
-      // })
-
-      /* Pipe to the next middleware to do the next job */
-      next()
+  return async (req, res, next) => {
+    const { method, originalUrl } = req;
+    const { endpoint } = config;
+    if (isEqual(method.toLowerCase(), 'post') && isEqual(originalUrl, endpoint)) {
+      if (configError) throw configError;
+      const middleware = renderBatch(config, () => false);
+      await middleware(req, res, next);
     }
-  }
-}
+  };
+};
