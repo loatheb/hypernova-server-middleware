@@ -17,8 +17,6 @@ const defaultConfig = {
   files: [],
   logger: {},
   plugins: [],
-  port: 8080,
-  host: '0.0.0.0',
 };
 
 module.exports = (customConfig) => {
@@ -31,7 +29,9 @@ module.exports = (customConfig) => {
     if (isEqual(method.toLowerCase(), 'post') && isEqual(originalUrl, endpoint)) {
       if (configError) throw configError;
       const middleware = renderBatch(config, () => false);
-      await middleware(req, res, next);
+      const result = await middleware(req, res, next);
+      return result;
     }
+    return next();
   };
 };
